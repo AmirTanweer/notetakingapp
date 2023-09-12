@@ -3,10 +3,11 @@ const app=express();
 const PORT=process.env.PORT || 5000;
 const connectDB=require('./db')
 const auth=require('./routes/auth')
+require('dotenv').config();
 
 // 5lMI0nb6WKOhA2JJ
 
-connectDB()
+connectDB(process.env.MONGODB_URI)
 
 //middleware
 app.use(express.json())
