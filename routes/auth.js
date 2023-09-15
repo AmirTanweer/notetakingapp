@@ -1,11 +1,14 @@
 const express=require('express')
+require('dotenv').config();
 const User=require('../models/User')
 const router=express.Router();
 const {body,validationResult}=require('express-validator')
+const fetchuser=require("../middleware/fetchuser")
+
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET="hellothis$s$ecret"
+const JWT_SECRET=process.env.JWT_SECRET
 //ROUTE 1: create a User using: POST "/api/auth/createuser". No login required
 router.post('/createuser',[
     body('name',"Name must be atleast 3 character").isLength({min:3}),
@@ -39,7 +42,7 @@ router.post('/createuser',[
     const data={
         user:{
             id:user.id
-        }
+        }  
     }
    const authToken=jwt.sign(data,JWT_SECRET)
    console.log(authToken)
@@ -90,4 +93,22 @@ router.post('/login',[
         res.status(500).send("Internal Server Error")
     }
 }   )
+
+//ROUTE 3: Get loggedin User Details using: POST "/api/auth/getuser". login required
+
+router.post('/getuser',fetchuser, async (req,res)=>{
+
+    
+    try {
+        
+        userId=req.user.id
+        const user =await User.findById(userId).select("-password")
+        res.send(user)
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send("Internal Server Error")
+    }
+    
+}
+)
 module.exports=router
